@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Gmail 自動讀寫</title>
+  <style>
+    :root {
+      font-family: "Segoe UI", "Noto Sans TC", system-ui, sans-serif;
+      color: #172033;
+      background: #f3f6fb;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+      --blue: #356ae6;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --surface: #fff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body { margin: 0; min-width: 320px; }
+
+    button, input, textarea { font: inherit; }
+
+    button {
+      min-height: 42px;
+      padding: 0 16px;
+      border: 0;
+      border-radius: 10px;
+      color: #fff;
+      background: var(--blue);
+      cursor: pointer;
+      font-weight: 650;
+    }
+
+    button:hover:not(:disabled) { background: #2458d2; }
+    button:disabled { cursor: not-allowed; opacity: .55; }
+    button.secondary { color: #273449; background: #eaf0fb; }
+    button.secondary:hover:not(:disabled) { background: #dce6f7; }
+    button.danger { color: #a12e38; background: #fff0f0; }
+    button.danger:hover:not(:disabled) { background: #ffe2e2; }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      padding: 18px max(24px, calc((100% - 1120px) / 2));
+      border-bottom: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-icon { font-size: 28px; }
+    .brand h1 { margin: 0; font-size: 19px; }
+    .brand p { margin: 3px 0 0; color: var(--muted); font-size: 13px; }
+    .header-actions { display: flex; align-items: center; gap: 12px; }
+    .account { color: var(--muted); font-size: 13px; }
+
+    main { width: min(1120px, calc(100% - 32px)); margin: 30px auto 64px; }
+
+    .welcome, .card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--surface);
+      box-shadow: 0 5px 20px rgb(34 55 90 / 4%);
+    }
+
+    .welcome { padding: clamp(24px, 5vw, 46px); }
+    .welcome h2 { margin: 0 0 8px; font-size: clamp(23px, 4vw, 32px); }
+    .welcome > p { max-width: 690px; margin: 0; color: var(--muted); line-height: 1.8; }
+
+    .security-note {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin: 24px 0;
+      padding: 14px 16px;
+      border: 1px solid #d6e5ff;
+      border-radius: 12px;
+      color: #324d7d;
+      background: #f4f8ff;
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .welcome-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+    .setup-hint { color: var(--muted); font-size: 13px; }
+
+    .workspace { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(300px, .8fr); gap: 20px; margin-top: 20px; }
+    .workspace[hidden] { display: none; }
+    .card { padding: 22px; }
+    .card h2 { margin: 0; font-size: 18px; }
+    .card-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+    .filters { display: grid; grid-template-columns: 1fr 1fr auto; gap: 10px; margin-bottom: 16px; }
+    label { display: block; margin-bottom: 6px; color: #475569; font-size: 12px; font-weight: 650; }
+    .field { min-width: 0; }
+    input, textarea {
+      width: 100%;
+      border: 1px solid #cbd5e1;
+      border-radius: 9px;
+      color: #172033;
+      background: #fff;
+    }
+    input { height: 41px; padding: 0 11px; }
+    textarea { min-height: 105px; padding: 10px 11px; resize: vertical; }
+    input:focus, textarea:focus { border-color: var(--blue); outline: 3px solid rgb(53 106 230 / 13%); }
+    .filter-button { align-self: end; }
+
+    .mail-count { color: var(--muted); font-size: 12px; }
+    .mail-list { display: grid; gap: 10px; }
+    .mail-item { padding: 13px; border: 1px solid var(--line); border-radius: 11px; }
+    .mail-meta { display: flex; justify-content: space-between; gap: 12px; color: var(--muted); font-size: 12px; }
+    .mail-from { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .mail-subject { margin: 7px 0 0; font-size: 14px; font-weight: 700; overflow-wrap: anywhere; }
+    .empty-state { padding: 28px 12px; color: var(--muted); text-align: center; }
+    .compose { display: grid; gap: 13px; }
+    .compose button { justify-self: start; }
+    .compose-help { margin: -4px 0 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+
+    .activity { margin-top: 20px; }
+    .activity h2 { margin: 0 0 12px; font-size: 16px; }
+    #status { display: grid; gap: 8px; }
+    .status-item { padding: 11px 13px; border-radius: 9px; background: #f5f7fb; font-size: 13px; line-height: 1.55; }
+    .status-item.error { color: #922b35; background: #fff1f1; }
+    .status-item.success { color: #21643b; background: #effaf2; }
+
+    footer { margin-top: 24px; color: var(--muted); font-size: 12px; line-height: 1.7; text-align: center; }
+
+    @media (max-width: 760px) {
+      header { align-items: flex-start; padding: 14px 16px; }
+      .header-actions { align-items: flex-end; flex-direction: column-reverse; gap: 7px; }
+      .workspace { grid-template-columns: 1fr; }
+      .filters { grid-template-columns: 1fr 1fr; }
+      .filter-button { grid-column: 1 / -1; }
+      .card { padding: 17px; }
+      .setup-hint { flex-basis: 100%; }
+    }
+
+    @media (max-width: 420px) {
+      .brand p { max-width: 190px; }
+      .header-actions button { padding: 0 10px; font-size: 12px; }
+      .filters { grid-template-columns: 1fr; }
+      .filter-button { grid-column: auto; }
+    }
+  </style>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span class="brand-icon" aria-hidden="true">✉️</span>
+      <div>
+        <h1>Gmail 自動讀寫</h1>
+        <p>Google OAuth 授權 · Gmail API · 網頁版</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <span id="account" class="account">尚未連線</span>
+      <button id="signOut" class="secondary" type="button" hidden>登出並撤銷授權</button>
+    </div>
+  </header>
+
+  <main>
+    <section class="welcome" aria-labelledby="welcomeTitle">
+      <h2 id="welcomeTitle">安全地讀取與寄送 Gmail</h2>
+      <p>使用 Google 官方授權視窗登入，不需要輸入 Gmail 密碼或應用程式密碼。授權後可列出最新郵件、套用搜尋條件、寄送測試信，並確認測試信已出現在收件匣。</p>
+      <div class="security-note">
+        <span aria-hidden="true">🔒</span>
+        <span>授權權杖只保留在目前瀏覽器記憶體；關閉或重新載入頁面即清除。此網頁不會把密碼或權杖寫入 GitHub、localStorage 或執行紀錄。</span>
+      </div>
+      <div class="welcome-actions">
+        <button id="connect" type="button">使用 Google 帳戶連線</button>
+        <span class="setup-hint">首次使用需先設定 Google OAuth 用戶端 ID，詳見 README。</span>
+      </div>
+    </section>
+
+    <section id="workspace" class="workspace" hidden aria-label="Gmail 工作區">
+      <article class="card">
+        <div class="card-heading">
+          <h2>收件匣</h2>
+          <span id="mailCount" class="mail-count">尚未讀取</span>
+        </div>
+        <div class="filters">
+          <div class="field">
+            <label for="subjectFilter">主旨關鍵字</label>
+            <input id="subjectFilter" type="search" placeholder="例如：課程通知">
+          </div>
+          <div class="field">
+            <label for="afterFilter">日期之後</label>
+            <input id="afterFilter" type="date">
+          </div>
+          <button id="refresh" class="secondary filter-button" type="button">讀取最新 10 封</button>
+        </div>
+        <div id="mailList" class="mail-list" aria-live="polite">
+          <div class="empty-state">登入後讀取收件匣。</div>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-heading">
+          <h2>寄送測試信</h2>
+        </div>
+        <form id="compose" class="compose">
+          <div class="field">
+            <label for="recipient">收件者</label>
+            <input id="recipient" name="recipient" type="email" autocomplete="email" required>
+          </div>
+          <div class="field">
+            <label for="subject">主旨</label>
+            <input id="subject" name="subject" type="text" maxlength="180" required>
+          </div>
+          <div class="field">
+            <label for="body">內文</label>
+            <textarea id="body" name="body" maxlength="10000" required></textarea>
+          </div>
+          <p class="compose-help">寄給目前登入的帳號時，會自動在收件匣搜尋這封信並顯示驗證結果。寄給其他人時只會回報 Gmail API 的寄送結果。</p>
+          <button id="send" type="submit">寄出郵件</button>
+        </form>
+      </article>
+    </section>
+
+    <section class="card activity" aria-labelledby="activityTitle">
+      <h2 id="activityTitle">執行狀態</h2>
+      <div id="status" aria-live="polite">
+        <div class="status-item">請先使用 Google 帳戶連線。每次讀信或寄信的結果會顯示在此處。</div>
+      </div>
+    </section>
+
+    <footer>
+      網頁以 Gmail API 與 OAuth 2.0 運作，這是瀏覽器版的安全替代方案；與使用 16 字元應用程式密碼連線 IMAP/SMTP 的原作業方式不同。
+    </footer>
+  </main>
+
+  <script>
+    "use strict";
+
+    // Replace this with the OAuth 2.0 Web application client ID from Google Cloud.
+    const GOOGLE_CLIENT_ID = "YOUR_GOOGLE_OAUTH_CLIENT_ID";
+    const GMAIL_SCOPE = "https://www.googleapis.com/auth/gmail.readonly https://www.googleapis.com/auth/gmail.send";
+    const API_ROOT = "https://gmail.googleapis.com/gmail/v1/users/me";
+    const MAX_MESSAGES = 10;
+
+    let tokenClient = null;
+    let accessToken = null;
+    let accountEmail = "";
+    let operationBusy = false;
+
+    const elements = {
+      account: document.querySelector("#account"),
+      connect: document.querySelector("#connect"),
+      signOut: document.querySelector("#signOut"),
+      workspace: document.querySelector("#workspace"),
+      refresh: document.querySelector("#refresh"),
+      mailCount: document.querySelector("#mailCount"),
+      mailList: document.querySelector("#mailList"),
+      subjectFilter: document.querySelector("#subjectFilter"),
+      afterFilter: document.querySelector("#afterFilter"),
+      compose: document.querySelector("#compose"),
+      send: document.querySelector("#send"),
+      recipient: document.querySelector("#recipient"),
+      subject: document.querySelector("#subject"),
+      body: document.querySelector("#body"),
+      status: document.querySelector("#status"),
+    };
+
+    function report(message, kind = "info") {
+      const item = document.createElement("div");
+      item.className = `status-item${kind === "error" ? " error" : kind === "success" ? " success" : ""}`;
+      item.textContent = `${new Date().toLocaleTimeString()}　${message}`;
+      elements.status.prepend(item);
+      while (elements.status.children.length > 8) {
+        elements.status.lastElementChild.remove();
+      }
+    }
+
+    function describeError(error) {
+      const detail = error && error.message ? error.message : String(error);
+      if (/401|invalid credentials|unauthenticated/i.test(detail)) {
+        return "Google 授權已失效，請登出後重新連線。";
+      }
+      if (/403|insufficient|forbidden|permission/i.test(detail)) {
+        return "Google 帳戶未授予所需 Gmail 權限，請重新連線並同意讀信及寄信權限。";
+      }
+      if (/failed to fetch|network|load failed/i.test(detail)) {
+        return "網路連線失敗，請檢查網路後重試。";
+      }
+      return detail;
+    }
+
+    async function gmailRequest(path, options = {}) {
+      if (!accessToken) {
+        throw new Error("請先連線 Google 帳戶。");
+      }
+      const response = await fetch(`${API_ROOT}${path}`, {
+        ...options,
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          ...(options.headers || {}),
+        },
+      });
+      if (!response.ok) {
+        const payload = await response.json().catch(() => ({}));
+        const message = payload.error && payload.error.message
+          ? payload.error.message
+          : `Gmail API 回應錯誤（HTTP ${response.status}）。`;
+        throw new Error(message);
+      }
+      if (response.status === 204) {
+        return null;
+      }
+      return response.json();
+    }
+
+    function decodeBase64Url(value) {
+      const normalized = value.replace(/-/g, "+").replace(/_/g, "/");
+      const binary = atob(normalized);
+      const bytes = Uint8Array.from(binary, character => character.charCodeAt(0));
+      return new TextDecoder("utf-8").decode(bytes);
+    }
+
+    function getHeader(headers, name) {
+      const header = (headers || []).find(item => item.name.toLowerCase() === name.toLowerCase());
+      return header ? header.value : "";
+    }
+
+    function renderMessages(messages, inboxEstimate, resultSizeEstimate) {
+      elements.mailList.replaceChildren();
+      elements.mailCount.textContent = `收件匣約 ${inboxEstimate} 封 · 符合條件約 ${resultSizeEstimate} 封 · 顯示 ${messages.length} 封`;
+      if (messages.length === 0) {
+        const empty = document.createElement("div");
+        empty.className = "empty-state";
+        empty.textContent = "沒有符合條件的郵件。";
+        elements.mailList.append(empty);
+        return;
+      }
+
+      for (const message of messages) {
+        const item = document.createElement("article");
+        item.className = "mail-item";
+        const meta = document.createElement("div");
+        meta.className = "mail-meta";
+        const sender = document.createElement("span");
+        sender.className = "mail-from";
+        sender.textContent = message.sender || "未知寄件者";
+        const time = document.createElement("time");
+        const parsedDate = Date.parse(message.date);
+        time.textContent = Number.isNaN(parsedDate)
+          ? message.date || ""
+          : new Date(parsedDate).toLocaleString();
+        meta.append(sender, time);
+        const subject = document.createElement("p");
+        subject.className = "mail-subject";
+        subject.textContent = message.subject || "（無主旨）";
+        item.append(meta, subject);
+        elements.mailList.append(item);
+      }
+    }
+
+    function buildSearchQuery() {
+      const parts = ["in:inbox"];
+      const subject = elements.subjectFilter.value.trim();
+      const after = elements.afterFilter.value;
+      if (subject) {
+        parts.push(`subject:"${subject.replace(/["\\]/g, " ").trim()}"`);
+      }
+      if (after) {
+        const [year, month, day] = after.split("-").map(Number);
+        const dateValue = new Date(Date.UTC(year, month - 1, day));
+        const afterEpoch = Math.floor(dateValue.getTime() / 1000);
+        parts.push(`after:${afterEpoch}`);
+      }
+      return parts.join(" ");
+    }
+
+    async function loadMessages(query = buildSearchQuery()) {
+      const [list, inbox] = await Promise.all([
+        gmailRequest(`/messages?maxResults=${MAX_MESSAGES}&q=${encodeURIComponent(query)}`),
+        gmailRequest("/messages?maxResults=1&q=in%3Ainbox"),
+      ]);
+      const messages = list.messages || [];
+      const details = await Promise.all(messages.map(async message => {
+        const detail = await gmailRequest(`/messages/${encodeURIComponent(message.id)}?format=metadata&metadataHeaders=From&metadataHeaders=Subject&metadataHeaders=Date`);
+        return {
+          id: detail.id,
+          sender: getHeader(detail.payload.headers, "From"),
+          subject: getHeader(detail.payload.headers, "Subject"),
+          date: getHeader(detail.payload.headers, "Date"),
+        };
+      }));
+      details.sort((first, second) => Date.parse(second.date) - Date.parse(first.date));
+      renderMessages(details, inbox.resultSizeEstimate || 0, list.resultSizeEstimate || 0);
+      return details;
+    }
+
+    function setBusy(busy) {
+      operationBusy = busy;
+      elements.refresh.disabled = busy || !accessToken;
+      elements.send.disabled = busy || !accessToken;
+      elements.connect.disabled = busy || Boolean(accessToken);
+    }
+
+    async function readInbox() {
+      if (operationBusy || !accessToken) return;
+      setBusy(true);
+      try {
+        const messages = await loadMessages();
+        report(`讀取結果：已透過 Gmail API 讀取收件匣最新 ${messages.length} 封郵件。`, "success");
+      } catch (error) {
+        report(`讀取失敗：${describeError(error)}`, "error");
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    function toBase64(text) {
+      const bytes = new TextEncoder().encode(text);
+      let binary = "";
+      for (const byte of bytes) binary += String.fromCharCode(byte);
+      return btoa(binary);
+    }
+
+    function toBase64Url(text) {
+      return toBase64(text).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
+    }
+
+    function encodeHeader(value) {
+      const bytes = new TextEncoder().encode(value);
+      let binary = "";
+      for (const byte of bytes) binary += String.fromCharCode(byte);
+      return `=?UTF-8?B?${btoa(binary)}?=`;
+    }
+
+    function createRawMessage(recipient, subject, body) {
+      const safeRecipient = recipient.replace(/[\r\n]/g, "");
+      const safeSubject = subject.replace(/[\r\n]/g, " ");
+      const content = [
+        `To: ${safeRecipient}`,
+        `Subject: ${encodeHeader(safeSubject)}`,
+        "MIME-Version: 1.0",
+        "Content-Type: text/plain; charset=UTF-8",
+        "Content-Transfer-Encoding: base64",
+        "",
+        toBase64(body),
+      ].join("\r\n");
+      return toBase64Url(content);
+    }
+
+    async function verifyMessage(subject) {
+      const escaped = subject.replace(/["\\]/g, " ").trim();
+      const query = `in:inbox from:me subject:"${escaped}" newer_than:2d`;
+      const attempts = 5;
+      for (let attempt = 0; attempt < attempts; attempt += 1) {
+        const messages = await loadMessages(query);
+        if (messages.some(message => message.subject === subject)) {
+          return true;
+        }
+        if (attempt < attempts - 1) {
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+      }
+      return false;
+    }
+
+    async function sendMessage(event) {
+      event.preventDefault();
+      if (operationBusy || !accessToken) return;
+      if (!elements.compose.reportValidity()) return;
+
+      const recipient = elements.recipient.value.trim();
+      const subject = elements.subject.value.trim();
+      const body = elements.body.value;
+      setBusy(true);
+      try {
+        await gmailRequest("/messages/send", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ raw: createRawMessage(recipient, subject, body) }),
+        });
+        report(`寄送結果：Gmail API 已接受寄送至 ${recipient}，主旨「${subject}」。`, "success");
+
+        if (recipient.toLowerCase() === accountEmail.toLowerCase()) {
+          report("正在收件匣搜尋測試信，以驗證寄送結果……");
+          const verified = await verifyMessage(subject);
+          if (verified) {
+            report("寄送後驗證成功：已在收件匣找到剛寄出的郵件。", "success");
+          } else {
+            report("寄送後驗證逾時：Gmail 已接受寄送，但尚未在收件匣找到該信。", "error");
+          }
+        } else {
+          report("未執行收件匣驗證：網頁只能讀取目前登入帳號的郵件，無法確認其他收件者是否收到。");
+        }
+      } catch (error) {
+        report(`寄送失敗：${describeError(error)}`, "error");
+      } finally {
+        setBusy(false);
+      }
+    }
+
+    function connectGoogle() {
+      if (GOOGLE_CLIENT_ID === "YOUR_GOOGLE_OAUTH_CLIENT_ID") {
+        report("尚未設定 Google OAuth 用戶端 ID；請先依 README 完成 Google Cloud 設定。", "error");
+        return;
+      }
+      if (!window.google || !window.google.accounts || !window.google.accounts.oauth2) {
+        report("Google 授權程式尚未載入，請檢查網路連線後重試。", "error");
+        return;
+      }
+      tokenClient = window.google.accounts.oauth2.initTokenClient({
+        client_id: GOOGLE_CLIENT_ID,
+        scope: GMAIL_SCOPE,
+        callback: async response => {
+          if (response.error) {
+            report(`Google 授權失敗：${response.error}`, "error");
+            return;
+          }
+          accessToken = response.access_token;
+          try {
+            const profile = await gmailRequest("/profile");
+            accountEmail = profile.emailAddress || "";
+            elements.account.textContent = accountEmail || "Google 帳戶已連線";
+            elements.workspace.hidden = false;
+            elements.signOut.hidden = false;
+            elements.connect.hidden = true;
+            elements.recipient.value = accountEmail;
+            report(`Google 帳戶授權成功：${accountEmail || "已連線"}`, "success");
+            await readInbox();
+          } catch (error) {
+            clearSession();
+            report(`無法讀取帳號資訊：${describeError(error)}`, "error");
+          }
+        },
+        error_callback: error => report(`無法開啟 Google 授權視窗：${error.type}`, "error"),
+      });
+      tokenClient.requestAccessToken({ prompt: "consent" });
+    }
+
+    function clearSession() {
+      accessToken = null;
+      accountEmail = "";
+      elements.account.textContent = "尚未連線";
+      elements.workspace.hidden = true;
+      elements.signOut.hidden = true;
+      elements.connect.hidden = false;
+      elements.mailList.replaceChildren();
+      elements.mailCount.textContent = "尚未讀取";
+      const empty = document.createElement("div");
+      empty.className = "empty-state";
+      empty.textContent = "登入後讀取收件匣。";
+      elements.mailList.append(empty);
+      setBusy(false);
+    }
+
+    function disconnectGoogle() {
+      if (accessToken && window.google && window.google.accounts) {
+        window.google.accounts.oauth2.revoke(accessToken, () => {
+          report("已撤銷 Google 授權並清除本頁工作階段。");
+        });
+      }
+      clearSession();
+    }
+
+    elements.connect.addEventListener("click", connectGoogle);
+    elements.signOut.addEventListener("click", disconnectGoogle);
+    elements.refresh.addEventListener("click", readInbox);
+    elements.compose.addEventListener("submit", sendMessage);
+  </script>
+</body>
+</html>

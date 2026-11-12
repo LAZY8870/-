@@ -1,0 +1,29 @@
+# Gmail 自動讀寫網頁版
+
+這是 Gmail 作業的瀏覽器版實作，透過 Google OAuth 2.0 與 Gmail API 讀取、寄送郵件。瀏覽器不能安全地直接連線 IMAP/SMTP；本版本不要求輸入或儲存 Gmail 密碼、應用程式密碼或 OAuth client secret。
+
+## Google OAuth 設定
+
+1. 在 Google Cloud Console 建立專案並啟用 **Gmail API**。
+2. 設定 OAuth 同意畫面，依 Google 規定設定測試使用者或完成應用程式驗證。
+3. 建立 OAuth 用戶端 ID，應用程式類型選 **Web application**。
+4. 在「已授權的 JavaScript 來源」加入實際網頁來源，例如：
+   - `http://localhost:8000`（本機測試）
+   - `https://LAZY8870.github.io`（GitHub Pages）
+5. 將產生的用戶端 ID 填入 `index.html` 的 `GOOGLE_CLIENT_ID`。用戶端 ID 不是密碼；不要建立或放入 client secret。
+6. 在 GitHub repository 的 **Settings → Pages** 將部署來源設為 `main` 分支的 `/ (root)`。部署完成後，網站網址會是 `https://LAZY8870.github.io/-/`。
+
+## 本機預覽
+
+以 VS Code 的 Live Server 開啟 `index.html`，或在本目錄執行任何本機靜態 HTTP server。不要直接用 `file://` 測試 Google OAuth；OAuth 需要符合設定的 HTTP(S) 網頁來源。
+
+## 功能
+
+- Google 網頁授權；僅要求 Gmail 讀信和寄信權限。
+- 顯示最新 10 封收件匣郵件的日期、寄件者和主旨。
+- 支援主旨關鍵字與日期之後篩選。
+- 寄送文字郵件；寄給登入帳號時自動搜尋收件匣並驗證是否收到。
+- 使用後可登出並撤銷授權。
+- 每次讀信、寄信、驗證與錯誤均顯示於執行狀態區。
+
+> 此 OAuth 網頁版與原作業指定的 16 字元應用程式密碼 + IMAP/SMTP 不同。報告應明確描述實際採用的 Gmail API/OAuth 方法及實際測試結果，不可宣稱使用 IMAP/SMTP。
