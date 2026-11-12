@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="作業二：用 Python 與網頁產生 QR Code，連結到自己的網頁並驗證掃描結果。">
+  <title>作業二：QR Code 導引網頁</title>
+  <style>
+    :root {
+      font-family: "Segoe UI", "Noto Sans TC", system-ui, sans-serif;
+      color: #172033;
+      background: #f3f6fb;
+      font-synthesis: none;
+      --blue: #356ae6;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --surface: #fff;
+    }
+
+    * { box-sizing: border-box; }
+    body { margin: 0; min-width: 320px; }
+    button, input, select { font: inherit; }
+    button {
+      min-height: 42px;
+      padding: 0 16px;
+      border: 0;
+      border-radius: 10px;
+      color: #fff;
+      background: var(--blue);
+      cursor: pointer;
+      font-weight: 650;
+    }
+    button:hover:not(:disabled) { background: #2458d2; }
+    button:disabled { cursor: not-allowed; opacity: .55; }
+    button.secondary { color: #273449; background: #eaf0fb; }
+    button.secondary:hover:not(:disabled) { background: #dce6f7; }
+    input, select {
+      width: 100%;
+      height: 42px;
+      padding: 0 11px;
+      border: 1px solid #cbd5e1;
+      border-radius: 9px;
+      color: #172033;
+      background: #fff;
+    }
+    input:focus, select:focus { border-color: var(--blue); outline: 3px solid rgb(53 106 230 / 13%); }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px max(20px, calc((100% - 1120px) / 2));
+      border-bottom: 1px solid var(--line);
+      background: var(--surface);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .brand-icon { font-size: 28px; }
+    .brand h1 { margin: 0; font-size: 19px; }
+    .brand p { margin: 3px 0 0; color: var(--muted); font-size: 13px; }
+    nav { display: flex; gap: 16px; }
+    nav a { color: var(--blue); font-size: 13px; font-weight: 650; text-decoration: none; }
+    nav a:hover { text-decoration: underline; }
+    main { width: min(1120px, calc(100% - 32px)); margin: 28px auto 60px; }
+    .hero, .card {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--surface);
+      box-shadow: 0 5px 20px rgb(34 55 90 / 4%);
+    }
+    .hero { padding: clamp(24px, 5vw, 42px); }
+    .eyebrow { margin: 0 0 10px; color: var(--blue); font-size: 13px; font-weight: 700; }
+    .hero h2 { margin: 0 0 10px; font-size: clamp(24px, 4vw, 34px); }
+    .hero > p:last-child { max-width: 760px; margin: 0; color: var(--muted); line-height: 1.8; }
+    .profile-card { margin-top: 16px; padding: 18px; border: 1px solid #d6e5ff; border-radius: 12px; background: #f4f8ff; }
+    .profile-card h3 { margin: 0 0 10px; font-size: 17px; }
+    .profile-card p { margin: 5px 0; color: #324d7d; font-size: 14px; }
+    .layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, .92fr); gap: 20px; margin-top: 20px; }
+    .card { padding: 22px; }
+    .card h2 { margin: 0; font-size: 19px; }
+    .card-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 18px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+    .field { min-width: 0; }
+    .field.full { grid-column: 1 / -1; }
+    label { display: block; margin-bottom: 6px; color: #475569; font-size: 12px; font-weight: 650; }
+    .hint { margin: 6px 0 0; color: var(--muted); font-size: 12px; line-height: 1.55; }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 17px; }
+    .actions a { display: inline-flex; min-height: 38px; align-items: center; padding: 0 12px; border-radius: 9px; color: #2458d2; background: #eaf0fb; font-size: 13px; font-weight: 650; text-decoration: none; }
+    .actions a:hover { background: #dce6f7; }
+    .samples { margin-top: 20px; }
+    .result-shell {
+      display: grid;
+      min-height: 360px;
+      place-items: center;
+      padding: 20px;
+      border: 1px dashed #cbd5e1;
+      border-radius: 13px;
+      background: #f9fbfe;
+      text-align: center;
+    }
+    #qrOutput { max-width: 100%; }
+    #qrOutput canvas, #qrOutput img {
+      display: block;
+      max-width: 100%;
+      height: auto;
+      margin: 0 auto;
+    }
+    .placeholder { color: var(--muted); line-height: 1.7; }
+    .stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 9px; margin-top: 13px; }
+    .stats[hidden], .profile-card[hidden] { display: none; }
+    .stat { padding: 10px; border-radius: 9px; background: #f2f6fd; }
+    .stat span { display: block; color: var(--muted); font-size: 11px; }
+    .stat strong { display: block; margin-top: 3px; font-size: 14px; }
+    .verify { margin-top: 12px; padding: 11px; border-radius: 9px; background: #effaf2; color: #21643b; font-size: 13px; line-height: 1.55; overflow-wrap: anywhere; }
+    .verify.error { color: #922b35; background: #fff1f1; }
+    .info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 13px; margin-top: 20px; }
+    .info-card { padding: 17px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+    .info-card h3 { margin: 0 0 7px; font-size: 15px; }
+    .info-card p { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.65; }
+    .notice { margin-top: 20px; padding: 15px 17px; border: 1px solid #f1ddb0; border-radius: 12px; background: #fff9eb; color: #6b5429; font-size: 13px; line-height: 1.7; }
+    .notice a { color: inherit; }
+    #scannerInput { display: none; }
+    footer { margin-top: 25px; color: var(--muted); font-size: 12px; line-height: 1.7; text-align: center; }
+    @media (max-width: 760px) {
+      header { align-items: flex-start; }
+      nav { flex-direction: column; align-items: flex-end; gap: 6px; }
+      .layout { grid-template-columns: 1fr; }
+      .info-grid { grid-template-columns: 1fr; }
+      .card { padding: 17px; }
+    }
+    @media (max-width: 440px) {
+      .brand p { max-width: 180px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .field.full { grid-column: auto; }
+      .result-shell { min-height: 300px; padding: 12px; }
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js" defer></script>
+  <script src="./app.js" defer></script>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span class="brand-icon" aria-hidden="true">▦</span>
+      <div>
+        <h1>作業二：QR Code 導引網頁</h1>
+        <p>產生 QR Code · 解碼驗證 · 手機掃描</p>
+      </div>
+    </div>
+    <nav aria-label="作業頁面">
+      <a href="../">作業一：Gmail</a>
+      <a href="#local-test">本機掃描說明</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <p class="eyebrow">PYTHON QR CODE LAB</p>
+      <h2>把網址變成手機一掃就能開啟的 QR Code</h2>
+      <p>設定個人資料與目標網址，產生可下載的 QR Code，並用程式重新解碼比對。下方 Python 程式還能啟動本機網站、產生區網 QR Code，並留下真實連線紀錄。</p>
+      <section id="personalProfile" class="profile-card" hidden aria-label="QR Code 個人資料">
+        <h3>QR Code 導引成功</h3>
+        <p>姓名：<strong id="profileName"></strong></p>
+        <p>學號：<strong id="profileId"></strong></p>
+      </section>
+    </section>
+
+    <section class="layout" aria-label="QR Code 產生器">
+      <article class="card">
+        <div class="card-heading"><h2>QR Code 產生器</h2></div>
+        <form id="qrForm">
+          <div class="form-grid">
+            <div class="field">
+              <label for="studentName">姓名（可留白）</label>
+              <input id="studentName" autocomplete="name" maxlength="60" placeholder="請輸入姓名">
+            </div>
+            <div class="field">
+              <label for="studentId">學號（可留白）</label>
+              <input id="studentId" maxlength="40" placeholder="請輸入學號">
+            </div>
+            <div class="field full">
+              <label for="targetUrl">要導引的網址</label>
+              <input id="targetUrl" type="url" required>
+              <p class="hint">請使用公開可開啟的 HTTPS 網址，或稍後在本機執行 Python serve 取得同 Wi-Fi 的專屬網址。</p>
+            </div>
+            <div class="field">
+              <label for="correction">容錯等級</label>
+              <select id="correction">
+                <option value="L">L · 約 7%</option>
+                <option value="M" selected>M · 約 15%</option>
+                <option value="Q">Q · 約 25%</option>
+                <option value="H">H · 約 30%</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="pixelSize">每個模組像素</label>
+              <select id="pixelSize">
+                <option value="6">6 px</option>
+                <option value="8" selected>8 px</option>
+                <option value="10">10 px</option>
+                <option value="12">12 px</option>
+              </select>
+            </div>
+            <div class="field full">
+              <label for="labelText">圖片標籤（選填）</label>
+              <input id="labelText" maxlength="50" placeholder="例如：掃描查看個人介紹">
+            </div>
+          </div>
+          <div class="actions">
+            <button type="submit">產生並驗證 QR Code</button>
+            <button id="download" class="secondary" type="button" disabled>下載 PNG</button>
+            <button id="scanFile" class="secondary" type="button">解碼圖片檔</button>
+            <input id="scannerInput" type="file" accept="image/*">
+          </div>
+        </form>
+      </article>
+
+      <article class="card">
+        <div class="card-heading"><h2>產生結果</h2></div>
+        <div class="result-shell">
+          <div>
+            <div id="qrOutput" aria-live="polite"></div>
+            <div id="qrPlaceholder" class="placeholder">設定網址後按「產生並驗證 QR Code」。</div>
+          </div>
+        </div>
+        <div id="stats" class="stats" hidden>
+          <div class="stat"><span>QR Code 版本</span><strong id="statVersion">—</strong></div>
+          <div class="stat"><span>模組數</span><strong id="statModules">—</strong></div>
+          <div class="stat"><span>容錯等級</span><strong id="statCorrection">—</strong></div>
+          <div class="stat"><span>圖片尺寸</span><strong id="statPixels">—</strong></div>
+        </div>
+        <div id="verification" class="verify" hidden aria-live="polite"></div>
+      </article>
+    </section>
+
+    <section class="info-grid" aria-label="QR Code 原理">
+      <article class="info-card">
+        <h3>版本與模組數</h3>
+        <p>QR Code 版本從 1 到 40。版本 n 的矩陣為 (4n + 17) × (4n + 17) 個黑白模組；內容越長通常需要越高版本。</p>
+      </article>
+      <article class="info-card">
+        <h3>容錯等級</h3>
+        <p>L、M、Q、H 的錯誤修正能力約為 7%、15%、25%、30%。容錯越高越能承受污損，但相同內容的圖樣可能更密。</p>
+      </article>
+      <article class="info-card">
+        <h3>自動解碼驗證</h3>
+        <p>產生後立即從 QR 圖片解碼，將結果與原始網址逐字比對；也可選取既有 QR 圖片進行解碼。</p>
+      </article>
+    </section>
+
+    <section class="card samples">
+      <div class="card-heading"><h2>Python 程式與 QR 圖片</h2></div>
+      <p class="hint">以下 PNG 是本機 Python 產生並以 OpenCV 解碼成功的範例，內容指向本作業頁；它們不是兩台手機掃描或本機伺服器的實測證據。</p>
+      <div class="actions">
+        <a href="./qr_web.py" download>下載 qr_web.py</a>
+        <a href="./requirements-qrcode.txt" download>下載套件清單</a>
+        <a href="./examples/qr_page_m.png" download>下載標籤 QR PNG</a>
+        <a href="./examples/levels/qr_L.png" download>容錯 L</a>
+        <a href="./examples/levels/qr_M.png" download>容錯 M</a>
+        <a href="./examples/levels/qr_Q.png" download>容錯 Q</a>
+        <a href="./examples/levels/qr_H.png" download>容錯 H</a>
+      </div>
+    </section>
+
+    <section id="local-test" class="notice">
+      <strong>作業實測提醒：</strong>GitHub Pages 是靜態網站，無法記錄訪客的來源 IP。要完成「本機網站連線紀錄」要求，請從
+      <a href="./README.md">作業說明</a> 安裝依賴並執行 `python qr_web.py serve --name 姓名 --student-id 學號`，
+      讓電腦與至少兩台手機連同一個 Wi-Fi，再掃描終端機產生的區網 QR Code。實際手機掃描與連線紀錄請以本人測試為準。
+    </section>
+
+    <footer>若在 QR 中加入姓名或學號，資料會顯示給掃描者，請勿放入不想公開的資訊；資料放在網址片段中，不會隨 HTTP 請求送到 GitHub。要符合本機 IP 紀錄需求，請使用 Python serve 模式。</footer>
+  </main>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>我的 QR Code 導引網頁</title>
+  <style>
+    :root { font-family: "Segoe UI", "Noto Sans TC", system-ui, sans-serif; color: #172033; background: #f1f5fb; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 20px; }
+    main { width: min(560px, 100%); padding: clamp(24px, 7vw, 44px); border: 1px solid #dfe7f2; border-radius: 20px; background: #fff; box-shadow: 0 12px 40px rgb(26 47 79 / 9%); }
+    .icon { font-size: 42px; }
+    h1 { margin: 12px 0 6px; font-size: clamp(24px, 5vw, 34px); }
+    .intro, .help { color: #64748b; line-height: 1.7; }
+    .profile { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 24px 0; }
+    .profile div { padding: 12px; border-radius: 10px; background: #f3f6fc; }
+    .profile dt { color: #64748b; font-size: 12px; }
+    .profile dd { margin: 4px 0 0; font-size: 16px; font-weight: 700; overflow-wrap: anywhere; }
+    label { display: block; margin-bottom: 7px; font-size: 14px; font-weight: 650; }
+    input { width: 100%; height: 44px; padding: 0 12px; border: 1px solid #cbd5e1; border-radius: 9px; font: inherit; }
+    button { min-height: 44px; margin-top: 12px; padding: 0 18px; border: 0; border-radius: 9px; color: #fff; background: #356ae6; font: inherit; font-weight: 650; cursor: pointer; }
+    button:hover { background: #2458d2; }
+    #message { min-height: 24px; margin-top: 12px; color: #21643b; font-size: 13px; }
+    .privacy { margin-top: 24px; padding-top: 16px; border-top: 1px solid #e2e8f0; color: #64748b; font-size: 12px; line-height: 1.65; }
+    @media (max-width: 430px) { .profile { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="icon" aria-hidden="true">👋</div>
+    <h1>歡迎來到我的網頁</h1>
+    <p class="intro">你已透過 QR Code 成功開啟本機架設的個人導引頁。</p>
+    <dl class="profile">
+      <div><dt>姓名</dt><dd id="name">__NAME__</dd></div>
+      <div><dt>學號</dt><dd id="studentId">__STUDENT_ID__</dd></div>
+    </dl>
+    <form id="checkinForm">
+      <label for="visitor">掃描者暱稱（選填）</label>
+      <input id="visitor" name="visitor" maxlength="40" autocomplete="nickname" placeholder="可輸入暱稱簽到">
+      <button type="submit">送出簽到</button>
+    </form>
+    <div id="message" aria-live="polite"></div>
+    <p class="privacy">本頁由 Python 在本機啟動。開啟頁面時，伺服器會在本機紀錄時間、來源 IP 與瀏覽器；簽到名稱只存在本機作業紀錄。請勿在公共場合展示包含個資的紀錄。</p>
+  </main>
+  <script>
+    "use strict";
+    const form = document.querySelector("#checkinForm");
+    const message = document.querySelector("#message");
+    form.addEventListener("submit", async event => {
+      event.preventDefault();
+      const visitor = document.querySelector("#visitor").value.trim();
+      try {
+        const response = await fetch("/api/checkins", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ visitor }),
+        });
+        if (!response.ok) throw new Error("本機伺服器未回應簽到。");
+        const result = await response.json();
+        message.textContent = `簽到成功！目前收到 ${result.total} 次簽到。`;
+      } catch (error) {
+        message.textContent = error instanceof Error ? error.message : "簽到失敗。";
+      }
+    });
+  </script>
+</body>
+</html>

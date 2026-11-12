@@ -27,3 +27,7 @@
 - 每次讀信、寄信、驗證與錯誤均顯示於執行狀態區。
 
 > 此 OAuth 網頁版與原作業指定的 16 字元應用程式密碼 + IMAP/SMTP 不同。報告應明確描述實際採用的 Gmail API/OAuth 方法及實際測試結果，不可宣稱使用 IMAP/SMTP。
+
+## 作業二：QR Code 導引網頁
+
+第二份作業已獨立放在 [qrcode/](./qrcode/)；部署網址為 [`https://LAZY8870.github.io/-/qrcode/`](https://LAZY8870.github.io/-/qrcode/)。此頁提供瀏覽器版 QR Code 產生與解碼驗證，Python 作業程式則支援 `make`、`decode`、`compare` 與 `serve`。本機 `serve` 模式會記錄實際連線時間、來源 IP 與瀏覽器，GitHub Pages 本身是靜態網站，不能取代此本機連線紀錄。

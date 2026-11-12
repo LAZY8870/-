@@ -58,6 +58,8 @@
     .brand p { margin: 3px 0 0; color: var(--muted); font-size: 13px; }
     .header-actions { display: flex; align-items: center; gap: 12px; }
     .account { color: var(--muted); font-size: 13px; }
+    .assignment-link { color: var(--blue); font-size: 13px; font-weight: 650; text-decoration: none; }
+    .assignment-link:hover { text-decoration: underline; }
 
     main { width: min(1120px, calc(100% - 32px)); margin: 30px auto 64px; }
 
@@ -158,6 +160,7 @@
       </div>
     </div>
     <div class="header-actions">
+      <a class="assignment-link" href="./qrcode/">作業二：QR Code</a>
       <span id="account" class="account">尚未連線</span>
       <button id="signOut" class="secondary" type="button" hidden>登出並撤銷授權</button>
     </div>

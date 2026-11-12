@@ -1,0 +1,5 @@
+qrcode/site/index.html
+qrcode/qr_site.png
+qrcode/results/
+qrcode/__pycache__/
+qrcode/*.py[cod]
