@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#237b58">
+  <meta name="description" content="海大餐廳線上候位，加入隊伍、查看候位狀態。">
+  <title>海大餐廳｜線上候位</title>
+  <link rel="stylesheet" href="./waitlist.css">
+  <script src="./app.js" defer></script>
+</head>
+<body data-page="customer">
+  <header class="topbar">
+    <a class="brand" href="./">
+      <span class="brand-mark" aria-hidden="true">禾</span>
+      <span><span class="brand-title">海大餐廳</span><span class="brand-subtitle">FRESH · LOCAL · WARM</span></span>
+    </a>
+    <nav class="topbar-links" aria-label="主要導覽">
+      <a href="./staff.html">員工管理</a>
+      <a href="../qrcode/">QR 作業</a>
+      <a href="../">作業首頁</a>
+    </nav>
+  </header>
+
+  <main class="page page-narrow">
+    <section class="hero">
+      <p class="eyebrow">WELCOME · ONLINE WAITLIST</p>
+      <h1>好好吃飯，<br>等位交給我們。</h1>
+      <p>加入線上候位後可以先到附近走走，隨時回來查看位置。輪到時我們會寄信通知你。</p>
+      <div class="hero-actions">
+        <span class="wait-pill">目前候位 <span id="currentCount">—</span> 組</span>
+        <a class="subtle-link" href="./staff.html">員工入口 →</a>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <div class="card-heading">
+        <div><h2>掃描加入候位</h2><p class="card-caption">掃描 QR Code 即可在手機開啟本頁</p></div>
+        <a class="subtle-link" href="./qr_waitlist_demo.png" download>下載 QR Code</a>
+      </div>
+      <img src="./qr_waitlist_demo.png" alt="海大餐廳候位頁 QR Code" width="190" height="190" style="display:block;width:min(190px,100%);height:auto;margin:auto;border-radius:12px">
+    </section>
+
+    <section class="main-grid">
+      <article class="card">
+        <div class="mode-banner" id="modeBanner" role="note">
+          <span aria-hidden="true">ℹ</span>
+          <div><strong>示範模式</strong><span data-mode-description>候位資料只存在此瀏覽器，不會跨裝置同步，也不會真的寄送通知信。</span></div>
+        </div>
+        <div class="card-heading">
+          <div><h2>加入候位</h2><p class="card-caption">填寫資料後立即取得候位號碼</p></div>
+          <span class="wait-pill">FIFO 排隊</span>
+        </div>
+
+        <form id="joinForm" novalidate>
+          <div class="field-grid">
+            <div class="field">
+              <label for="customerName">姓名 <span class="required">*</span></label>
+              <input id="customerName" name="name" autocomplete="name" maxlength="60" placeholder="怎麼稱呼你？" required>
+            </div>
+            <div class="field">
+              <label for="customerGender">性別 <span class="required">*</span></label>
+              <select id="customerGender" name="gender" required>
+                <option value="" selected disabled>請選擇</option>
+                <option value="男">男</option>
+                <option value="女">女</option>
+                <option value="其他">其他／不便透露</option>
+              </select>
+            </div>
+            <div class="field field-wide">
+              <label for="customerEmail">E-mail <span class="required">*</span></label>
+              <input id="customerEmail" name="email" type="email" autocomplete="email" maxlength="254" placeholder="通知信會寄到這裡" required>
+            </div>
+            <div class="field field-wide">
+              <label for="partySize">用餐人數 <span class="required">*</span></label>
+              <select id="partySize" name="party_size" required>
+                <option value="1">1 位</option>
+                <option value="2" selected>2 位</option>
+                <option value="3">3 位</option>
+                <option value="4">4 位</option>
+                <option value="5">5 位</option>
+                <option value="6">6 位</option>
+                <option value="7">7 位</option>
+                <option value="8">8 位</option>
+                <option value="9">9 位</option>
+                <option value="10">10 位</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-actions"><button id="joinButton" type="submit">加入候位隊伍 <span aria-hidden="true">→</span></button></div>
+          <p class="privacy-note">資料只用於本次候位與通知。示範模式資料保存在此瀏覽器；正式模式資料由 Apps Script 儲存。請勿在公開裝置填入真實個人資料。</p>
+        </form>
+
+        <section id="ticketPanel" class="ticket" hidden aria-live="polite">
+          <div class="ticket-top">
+            <div><p class="eyebrow">YOUR WAITING NUMBER</p><strong id="ticketNumber" class="ticket-number">#—</strong></div>
+            <div class="ticket-position"><div><strong id="ticketAhead">0</strong><span>組在你前面</span></div></div>
+          </div>
+          <span id="ticketStatus" class="ticket-status">候位中</span>
+          <div class="ticket-footer">
+            <span id="ticketName"></span> · <span id="ticketParty"></span><br>
+            候位狀態每 5 秒自動更新，收到通知後請儘速到櫃台報到。
+          </div>
+          <div class="ticket-actions"><button id="cancelTicket" class="secondary subtle" type="button">取消我的候位</button></div>
+        </section>
+        <p id="notice" class="notice" role="status" aria-live="polite"></p>
+      </article>
+
+      <aside class="card">
+        <div class="card-heading">
+          <div><h2>現場候位</h2><p class="card-caption">前幾組候位資訊即時更新</p></div>
+          <button id="refreshQueue" class="secondary subtle" type="button" aria-label="重新整理候位">↻ 更新</button>
+        </div>
+        <div class="queue-preview">
+          <h3>正在等候</h3>
+          <div id="queueList" class="queue-list"><div class="empty-state">正在讀取候位資料……</div></div>
+        </div>
+        <div class="notice">我們會按取號先後安排座位。多人同行請確認已填寫正確用餐人數。</div>
+      </aside>
+    </section>
+
+    <p class="footer">個人作品示範頁 · <a href="../qrcode/">QR Code 作業</a> · <a href="../">返回首頁</a></p>
+  </main>
+</body>
+</html>

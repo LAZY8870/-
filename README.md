@@ -31,3 +31,7 @@
 ## 作業二：QR Code 導引網頁
 
 第二份作業已獨立放在 [qrcode/](./qrcode/)；部署網址為 [`https://LAZY8870.github.io/-/qrcode/`](https://LAZY8870.github.io/-/qrcode/)。此頁提供瀏覽器版 QR Code 產生與解碼驗證，Python 作業程式則支援 `make`、`decode`、`compare` 與 `serve`。本機 `serve` 模式會記錄實際連線時間、來源 IP 與瀏覽器，GitHub Pages 本身是靜態網站，不能取代此本機連線紀錄。
+
+## 作業三：餐廳候位系統
+
+第三份作業位於 [waitlist/](./waitlist/)，包含顧客候位頁、員工管理頁、自寫 FIFO Queue 與 Google Apps Script Gmail 通知後端。預設示範模式只儲存資料於同一瀏覽器，不會跨裝置同步或真的寄信；正式功能須依 [waitlist/README.md](./waitlist/README.md) 部署 Apps Script，並設定後端網址與員工金鑰。

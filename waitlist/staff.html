@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#237b58">
+  <meta name="description" content="海大餐廳員工候位管理。">
+  <title>海大餐廳｜員工管理</title>
+  <link rel="stylesheet" href="./waitlist.css">
+  <script src="./app.js" defer></script>
+</head>
+<body data-page="staff">
+  <header class="topbar">
+    <a class="brand" href="./">
+      <span class="brand-mark" aria-hidden="true">禾</span>
+      <span><span class="brand-title">海大餐廳</span><span class="brand-subtitle">STAFF · WAITLIST</span></span>
+    </a>
+    <nav class="topbar-links" aria-label="主要導覽">
+      <a href="./">顧客候位頁</a>
+      <a href="../">作業首頁</a>
+    </nav>
+  </header>
+
+  <main class="page">
+    <section class="hero">
+      <p class="eyebrow">STAFF DASHBOARD</p>
+      <h1>候位管理</h1>
+      <p>查看目前隊伍、寄送到店通知，並記錄入座與取消。</p>
+    </section>
+
+    <section class="card login-panel">
+      <div class="mode-banner" id="modeBanner" role="note">
+        <span aria-hidden="true">ℹ</span>
+        <div><strong>示範模式</strong><span data-mode-description>候位資料只存在此瀏覽器，不會跨裝置同步，也不會真的寄送通知信。</span></div>
+      </div>
+      <form id="staffLoginForm">
+        <h2>員工登入</h2>
+        <p class="card-caption">輸入員工密碼以開啟管理功能</p>
+        <div class="field">
+          <label for="staffPassword">員工密碼</label>
+          <input id="staffPassword" type="password" autocomplete="current-password" maxlength="128" required>
+          <p class="field-hint" data-demo-mode-note>示範模式密碼為 <code>staff</code>；僅供本瀏覽器展示，非正式安全驗證。</p>
+        </div>
+        <div class="form-actions"><button type="submit">登入管理頁</button></div>
+      </form>
+      <p id="staffNotice" class="notice" role="status" aria-live="polite"></p>
+    </section>
+
+    <section id="staffPanel" class="page" hidden style="padding:0">
+      <article class="card">
+        <div class="toolbar">
+          <div><h2>候位 Queue</h2><p class="card-caption">FIFO 先進先出 · 每 5 秒自動更新</p></div>
+          <div class="toolbar-actions">
+            <button id="refreshStaff" class="secondary subtle" type="button">↻ 更新</button>
+            <button id="logoutStaff" class="secondary subtle" type="button">登出</button>
+          </div>
+        </div>
+        <div class="stat-grid staff-summary">
+          <div class="stat-box"><strong id="staffCount" class="stat-value">0</strong><span class="stat-label">目前候位</span></div>
+          <div class="stat-box"><strong id="joinedCount" class="stat-value">0</strong><span class="stat-label">今日取號</span></div>
+          <div class="stat-box"><strong id="seatedCount" class="stat-value">0</strong><span class="stat-label">今日入座</span></div>
+          <div class="stat-box"><strong id="cancelledCount" class="stat-value">0</strong><span class="stat-label">今日取消</span></div>
+        </div>
+        <div class="table-wrap">
+          <table class="queue-table">
+            <thead>
+              <tr><th>號碼</th><th>顧客 / E-mail</th><th>性別</th><th>人數</th><th>候位時間</th><th>狀態</th><th>操作</th></tr>
+            </thead>
+            <tbody id="staffQueue"><tr><td class="empty-state" colspan="7">登入後載入候位資料。</td></tr></tbody>
+          </table>
+        </div>
+        <p id="staffActionNotice" class="notice" role="status" aria-live="polite"></p>
+      </article>
+
+      <article class="card" style="margin-top:18px">
+        <div class="card-heading"><div><h2>事件紀錄</h2><p class="card-caption">最近 40 筆候位、通知、入座與取消操作</p></div><span class="wait-pill">平均等候 <span id="averageWait">0 分</span></span></div>
+        <div id="eventLog" class="history-list"><div class="empty-state">尚無操作紀錄。</div></div>
+        <div class="demo-tools"><button id="resetDemo" class="danger subtle" type="button">清除示範資料</button></div>
+      </article>
+    </section>
+
+    <p class="footer">員工頁面請勿公開分享含個人資料的截圖或連結。正式模式密碼由 Google Apps Script 驗證。</p>
+  </main>
+</body>
+</html>
