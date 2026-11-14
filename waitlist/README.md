@@ -23,7 +23,7 @@
 5. 把 `app.js` 開頭的 `API_URL` 換成自己的 `/exec` 網址並推送 GitHub。網址不是密碼；不要提交 `STAFF_KEY` 或其他私人資料。
 6. 用瀏覽器開啟 `API_URL?action=count`，應回傳 `{"waiting":0}`。
 
-目前已部署的 Web App：<https://script.google.com/macros/s/AKfycbx2HTwCydpXYtJ0h6DTHIEGhH4LwrZaehZQISnKa9hrgAppT3PRCtmQny2xgf_mfpxL/exec>。2026-11-14 已實際測試 `?action=count`，回應為 `{"waiting":0}`。正式取號、員工操作及實際寄信仍須另外測試。
+目前已部署的 Web App：<https://script.google.com/macros/s/AKfycbx2HTwCydpXYtJ0h6DTHIEGhH4LwrZaehZQISnKa9hrgAppT3PRCtmQny2xgf_mfpxL/exec>。2026-11-14 已測試三組正式取號、通知信收件、入座及取消；清除測試資料後 `?action=count` 回傳 `{"waiting":0}`。結果依本人確認；手機、跨裝置、操作截圖及正式事件紀錄匯出仍待完成。
 
 Apps Script 對顧客端公開姓名及人數以顯示 Queue 預覽；E-mail、性別和取消驗證 token 不會公開。員工密碼以及取消 token 透過 POST JSON 傳送，避免放在 URL。前端 POST 不設定 `Content-Type`，保持瀏覽器的 safelisted `text/plain`，避免 CORS preflight。
 
