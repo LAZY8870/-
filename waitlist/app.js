@@ -387,6 +387,10 @@
       activeTicketId = String(ticket.id);
       sessionStorage.setItem(TICKET_KEY, activeTicketId);
       sessionStorage.setItem(`${TICKET_KEY}.${activeTicketId}`, cancelToken);
+      renderTicket({ ...payload, ...ticket, status: "waiting" });
+      if (currentCount && Number.isFinite(ticket.waiting)) {
+        currentCount.textContent = String(ticket.waiting);
+      }
       await refreshPublic();
       setNotice(notice, `候位成功，號碼 #${ticket.id}；前面還有 ${ticket.ahead} 組。`, "success");
     } catch (error) {
