@@ -1,6 +1,18 @@
-# Gmail 自動讀寫網頁版
+# 作業一：Gmail 自動讀寫
 
-這是 Gmail 作業的瀏覽器版實作，透過 Google OAuth 2.0 與 Gmail API 讀取、寄送郵件。瀏覽器不能安全地直接連線 IMAP/SMTP；本版本不要求輸入或儲存 Gmail 密碼、應用程式密碼或 OAuth client secret。
+依課程 Word 說明的必要規格，作業一程式為 [`gmail_auto.py`](./gmail_auto.py)：使用 Python 標準函式庫、Google 應用程式密碼、IMAP 讀信和 SMTP 寄信，並可在寄給自己的測試信後驗證收件匣。沒有第三方 Python 套件需求。先依 `config.example.json` 建立本機 `config.json`；設定檔已由 `.gitignore` 排除，**不可上傳、繳交或截圖暴露密碼**。使用方式與報告填寫項目見 [`report_gmail.md`](./report_gmail.md)。
+
+```text
+python gmail_auto.py selftest
+python gmail_auto.py read --limit 5
+python gmail_auto.py send --to 自己的Gmail --subject "Gmail 作業測試" --body "這是一封自我測試郵件" --verify
+```
+
+`results/` 會記錄執行摘要，亦已由 `.gitignore` 排除以免公開郵件資料；繳交時請先檢查及遮蔽個資，再手動把必要紀錄放進作業 ZIP。
+
+## 額外瀏覽器版（非 IMAP/SMTP）
+
+同一 repository 的首頁是另一種 Gmail 網頁版實作，使用 Google OAuth 2.0 與 Gmail API 讀取、寄送郵件。瀏覽器不能安全地直接連線 IMAP/SMTP；此網頁不要求輸入或儲存 Gmail 密碼、應用程式密碼或 OAuth client secret。**它不是課程 Word 指定的 Python＋應用程式密碼版本，報告不可把 OAuth 說成 IMAP/SMTP。**
 
 ## Google OAuth 設定
 

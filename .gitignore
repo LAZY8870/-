@@ -3,3 +3,9 @@ qrcode/qr_site.png
 qrcode/results/
 qrcode/__pycache__/
 qrcode/*.py[cod]
+
+# Gmail assignment credentials and private execution records
+config.json
+/results/
+__pycache__/
+*.py[cod]
