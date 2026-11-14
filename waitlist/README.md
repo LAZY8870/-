@@ -20,8 +20,10 @@
    - `RESTAURANT`：餐廳顯示名稱（例如 `海大餐廳`）。
 3. 儲存並在 Apps Script 編輯器選取 `authorizeMail` →「執行」，依 Google 提示授權 MailApp 存取寄信額度。
 4. 部署 → 新增部署作業 → 網頁應用程式；執行身分選「我」，存取權選「所有人」。授權後複製結尾為 `/exec` 的網址。
-5. 把 `app.js` 開頭的 `API_URL = ""` 換成自己的 `/exec` 網址並推送 GitHub。網址不是密碼；不要提交 `STAFF_KEY` 或其他私人資料。
+5. 把 `app.js` 開頭的 `API_URL` 換成自己的 `/exec` 網址並推送 GitHub。網址不是密碼；不要提交 `STAFF_KEY` 或其他私人資料。
 6. 用瀏覽器開啟 `API_URL?action=count`，應回傳 `{"waiting":0}`。
+
+目前已部署的 Web App：<https://script.google.com/macros/s/AKfycbx2HTwCydpXYtJ0h6DTHIEGhH4LwrZaehZQISnKa9hrgAppT3PRCtmQny2xgf_mfpxL/exec>。2026-11-14 已實際測試 `?action=count`，回應為 `{"waiting":0}`。正式取號、員工操作及實際寄信仍須另外測試。
 
 Apps Script 對顧客端公開姓名及人數以顯示 Queue 預覽；E-mail、性別和取消驗證 token 不會公開。員工密碼以及取消 token 透過 POST JSON 傳送，避免放在 URL。前端 POST 不設定 `Content-Type`，保持瀏覽器的 safelisted `text/plain`，避免 CORS preflight。
 

@@ -1,7 +1,7 @@
 "use strict";
 
 (() => {
-  const API_URL = "";
+  const API_URL = "https://script.google.com/macros/s/AKfycbx2HTwCydpXYtJ0h6DTHIEGhH4LwrZaehZQISnKa9hrgAppT3PRCtmQny2xgf_mfpxL/exec";
   const RESTAURANT = "海大餐廳";
   const STORAGE_KEY = "restaurantWaitlist.demo.v1";
   const TICKET_KEY = "restaurantWaitlist.ticket.v1";
