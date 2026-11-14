@@ -128,7 +128,9 @@ def read_inbox(
         mailbox_total = len(message_ids)
         results: list[dict[str, str]] = []
         for message_id in reversed(message_ids):
-            status, fetched = client.fetch(message_id, "(RFC822)")
+            status, fetched = client.fetch(
+                message_id, "(BODY.PEEK[HEADER.FIELDS (DATE FROM SUBJECT)])"
+            )
             if status != "OK":
                 raise GmailAssignmentError(
                     f"無法讀取郵件 ID {message_id.decode('ascii', errors='replace')}。"
@@ -269,12 +271,49 @@ def verify_in_inbox(
     config: dict[str, str], subject: str, timeout_seconds: int = 20
 ) -> tuple[bool, float]:
     started = time.monotonic()
-    while time.monotonic() - started < timeout_seconds:
-        _, messages = read_inbox(config, limit=30, subject_keyword=subject)
-        if any(item["subject"] == subject for item in messages):
-            return True, time.monotonic() - started
-        time.sleep(2)
-    return False, time.monotonic() - started
+    client = open_imap(config)
+    try:
+        status, _ = client.select("INBOX", readonly=True)
+        if status != "OK":
+            raise GmailAssignmentError("無法開啟 Gmail 收件匣以驗證測試郵件。")
+        search_terms = subject.split()
+        search_term = next(
+            (term for term in reversed(search_terms) if any(char.isalpha() for char in term)),
+            search_terms[-1],
+        )
+        while time.monotonic() - started < timeout_seconds:
+            status, search_data = client.search(None, "SUBJECT", search_term)
+            if status != "OK":
+                raise GmailAssignmentError("無法搜尋 Gmail 收件匣以驗證測試郵件。")
+            message_ids = search_data[0].split() if search_data else []
+            for message_id in reversed(message_ids):
+                status, fetched = client.fetch(
+                    message_id, "(BODY.PEEK[HEADER.FIELDS (FROM SUBJECT)])"
+                )
+                if status != "OK":
+                    raise GmailAssignmentError("無法讀取測試郵件標頭以完成驗證。")
+                raw_header = next(
+                    (
+                        part[1]
+                        for part in fetched
+                        if isinstance(part, tuple) and isinstance(part[1], bytes)
+                    ),
+                    None,
+                )
+                if raw_header is not None:
+                    found = parse_message(raw_header)
+                    if (
+                        found["subject"] == subject
+                        and config["email"].casefold() in found["from"].casefold()
+                    ):
+                        return True, time.monotonic() - started
+            time.sleep(2)
+        return False, time.monotonic() - started
+    finally:
+        try:
+            client.logout()
+        except (imaplib.IMAP4.error, OSError):
+            pass
 
 
 def build_parser() -> argparse.ArgumentParser:
