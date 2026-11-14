@@ -1,6 +1,6 @@
 # 以 GitHub Pages 與 Google Apps Script 建置海大餐廳線上候位系統
 
-> Apps Script Web App 已部署，並已驗證公開 `count` API 回傳 `{"waiting":0}`。前端正式連線須待本次程式更新發布到 GitHub Pages 後再驗證；正式取號、跨裝置同步、手機掃描及真實寄信仍未完成。不可將示範模式結果當成正式後端測試。截圖需遮蔽顧客個資、員工密碼及取消 token。
+> Apps Script Web App 已部署；GitHub Pages 顧客頁已連到正式後端，實際顯示 0 組候位。正式取號、跨裝置同步、手機掃描及真實寄信仍未完成。不可將示範模式結果當成正式後端測試。截圖需遮蔽顧客個資、員工密碼及取消 token。
 
 ## 作業目的
 
@@ -118,9 +118,9 @@ remove(id, reason) {
 
 - 顧客頁：<https://lazy8870.github.io/-/waitlist/>
 - 員工頁：<https://lazy8870.github.io/-/waitlist/staff.html>
-- 上線檢查：兩個 Pages 網址均可開啟；顧客頁與員工頁均顯示「示範模式」。
-- `app.js` 已填入正式 `/exec` 網址；此次更新發布後，須再確認 Pages 不再顯示「示範模式」。
-- 目前已確認的是 API 的初始候位數回應；正式前端取號、跨裝置同步與寄信尚未實測。
+- 上線檢查：顧客頁與員工頁均可開啟並顯示「正式後端模式」；顧客頁顯示 0 組候位及空 Queue。
+- `app.js` 已填入正式 `/exec` 網址並發布到 GitHub Pages。
+- 瀏覽器實際確認 Pages 可連線取得 `{"waiting":0}`；正式取號、跨裝置同步與寄信尚未實測。
 - 證據：Apps Script `authorizeMail` 執行完成、部署成功及 `count` 回應；仍待本人補上操作截圖。
 
 ## 3.5 前後端溝通
@@ -176,7 +176,7 @@ remove(id, reason) {
 
 ## 3.12 結論與心得
 
-GitHub Pages 顧客頁與員工頁已完成桌面瀏覽器示範測試；Apps Script 已完成 MailApp 授權與 Web App 部署，公開 `count` API 實際回傳 `{"waiting":0}`。本次 `API_URL` 更新發布後仍須驗證正式取號、員工操作、跨裝置 Queue、手機 QR 掃描及真實通知郵件；目前不能宣稱完整正式候位流程已實測完成。正式使用仍須評估顧客個資保護、濫用防護、重複取號、郵件額度、50 組上限及資料保存期限。
+GitHub Pages 顧客頁與員工頁已連接 Apps Script 正式後端，顧客頁能讀到 0 組候位；示範密碼提示及清除示範資料按鈕在正式模式已隱藏。Apps Script 已完成 MailApp 授權與 Web App 部署。正式取號、員工操作、跨裝置 Queue、手機 QR 掃描及真實通知郵件仍待實測，因此目前不能宣稱完整正式候位流程已測完。正式使用仍須評估顧客個資保護、濫用防護、重複取號、郵件額度、50 組上限及資料保存期限。
 
 ## 繳交前檢查
 
@@ -184,7 +184,7 @@ GitHub Pages 顧客頁與員工頁已完成桌面瀏覽器示範測試；Apps Sc
 - [ ] `waitlist/` 前端程式與 `Code.gs`
 - [ ] 提交副本中的 `STAFF_KEY` 與 `API_URL` 已改成假值；正式 GAS 密碼未放進 GitHub
 - [ ] 指向顧客頁的 QR Code 圖片
-- [ ] 完成 Apps Script 設定、授權及 Web App 部署，將 `/exec` 設定到前端 `API_URL`
+- [x] 完成 Apps Script 設定、授權及 Web App 部署，將 `/exec` 設定到前端 `API_URL`
 - [ ] 以手機掃 QR，並以不同裝置確認正式 Queue 同步
 - [ ] 測試真實郵件收件、入座及取消；保存遮蔽個資的截圖
 - [ ] 填妥並附正式測試證據的報告

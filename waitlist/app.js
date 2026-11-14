@@ -643,6 +643,11 @@
   }
 
   function initStaffPage() {
+    if (isLive) {
+      document.querySelectorAll("[data-demo-mode-note], .demo-tools").forEach(node => {
+        node.hidden = true;
+      });
+    }
     staffLoginForm.addEventListener("submit", loginStaff);
     staffQueue.addEventListener("click", handleStaffAction);
     document.querySelector("#refreshStaff").addEventListener("click", loadStaffQueue);
