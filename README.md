@@ -1,6 +1,6 @@
 # 作業一：Gmail 自動讀寫
 
-依課程 Word 說明的必要規格，作業一程式為 [`gmail_auto.py`](./gmail_auto.py)：使用 Python 標準函式庫、Google 應用程式密碼、IMAP 讀信和 SMTP 寄信，並可在寄給自己的測試信後驗證收件匣。沒有第三方 Python 套件需求。先依 `config.example.json` 建立本機 `config.json`；設定檔已由 `.gitignore` 排除，**不可上傳、繳交或截圖暴露密碼**。使用方式與報告填寫項目見 [`report_gmail.md`](./report_gmail.md)。
+依課程 Word 說明的必要規格，作業一程式為 [`gmail_auto.py`](./gmail_auto.py)（[直接下載](https://raw.githubusercontent.com/LAZY8870/-/main/gmail_auto.py)）：使用 Python 標準函式庫、Google 應用程式密碼、IMAP 讀信和 SMTP 寄信，並可在寄給自己的測試信後驗證收件匣。沒有第三方 Python 套件需求。先依 `config.example.json` 建立本機 `config.json`；設定檔已由 `.gitignore` 排除，**不可上傳、繳交或截圖暴露密碼**。使用方式與報告填寫項目見 [`report_gmail.md`](./report_gmail.md)。
 
 ```text
 python gmail_auto.py selftest
